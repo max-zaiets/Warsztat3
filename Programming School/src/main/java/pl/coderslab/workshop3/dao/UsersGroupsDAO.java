@@ -1,7 +1,7 @@
 package pl.coderslab.workshop3.dao;
 
 import pl.coderslab.workshop3.model.UsersGroups;
-import pl.coderslab.workshop3.utils.GetConnection;
+import pl.coderslab.workshop3.utils.DBUtils;
 
 import java.sql.*;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ public class UsersGroupsDAO {
             "SELECT * FROM users_groups";
 
     public UsersGroups create(UsersGroups usersGroups) {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             PreparedStatement statement =
                     conn.prepareStatement(CREATE_USERSGROUP_QUERY, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, usersGroups.getName());
@@ -36,7 +36,7 @@ public class UsersGroupsDAO {
     }
 
     public UsersGroups read(int usersGroupId) {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(READ_USERSGROUP_QUERY);
             statement.setInt(1, usersGroupId);
             ResultSet resultSet = statement.executeQuery();
@@ -53,7 +53,7 @@ public class UsersGroupsDAO {
     }
 
     public void update(UsersGroups usersGroups) {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(UPDATE_USERSGROUP_QUERY);
             statement.setString(1, usersGroups.getName());
             statement.setInt(2, usersGroups.getId());
@@ -68,7 +68,7 @@ public class UsersGroupsDAO {
     }
 
     public void delete(int usersGroupId) {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(DELETE_USERSGROUP_QUERY);
             statement.setInt(1, usersGroupId);
             statement.executeUpdate();
@@ -84,7 +84,7 @@ public class UsersGroupsDAO {
     }
 
     public UsersGroups[] findAll() {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             UsersGroups[] usersGroups = new UsersGroups[0];
             PreparedStatement statement = conn.prepareStatement(FIND_ALL_USERSGROUPS_QUERY);
             ResultSet resultSet = statement.executeQuery();

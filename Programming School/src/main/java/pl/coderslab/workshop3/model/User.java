@@ -10,6 +10,8 @@ public class User {
     private String username;
     private String password;
 
+    private int usersGroupId;
+
     public User(){
     }
 
@@ -45,6 +47,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public int getUsersGroupId() {
+        return usersGroupId;
+    }
+
+    public void setUsersGroupId(int user_group_id) {
+        this.usersGroupId = user_group_id;
     }
 
     public void setPassword(String password) {

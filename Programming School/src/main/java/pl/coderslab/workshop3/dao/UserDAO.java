@@ -1,133 +1,79 @@
 package pl.coderslab.workshop3.dao;
 
 import pl.coderslab.workshop3.model.User;
-import pl.coderslab.workshop3.model.UsersGroups;
-import pl.coderslab.workshop3.utils.GetConnection;
+import pl.coderslab.workshop3.utils.DBUtils;;import java.util.ArrayList;
+import java.util.List;
 
-import java.sql.*;
-import java.util.Arrays;
 
 public class UserDAO {
-    private static final String CREATE_USER_QUERY =
-            "INSERT INTO users(username, email, password) VALUES (?, ?, ?)";
-    private static final String READ_USER_QUERY =
-            "SELECT * FROM users where id = ?";
-    private static final String UPDATE_USER_QUERY =
-            "UPDATE users SET username = ?, email = ?, password = ? where id = ?";
-    private static final String DELETE_USER_QUERY =
-            "DELETE FROM users WHERE id = ?";
-    private static final String FIND_ALL_USERS_QUERY =
-            "SELECT * FROM users";
-    private static final String FIND_ALL_USERS_BY_USERS_GROUP_ID_QUERY =
-            "SELECT * FROM users WHERE user_group_id = ?";
+    private DBUtils dbUtil = new DBUtils();
 
+    public int create(User user) {
+        int userId = dbUtil.create(
+                "INSERT INTO users(username, email, password) VALUES (?, ?, ?)",
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword()
+        );
 
-    public User create(User user) {
-        try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement =
-                    conn.prepareStatement(CREATE_USER_QUERY, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
-            statement.executeUpdate();
-            ResultSet resultSet = statement.getGeneratedKeys();
-            if (resultSet.next()) {
-                user.setId(resultSet.getInt(1));
-            }
-            return user;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return userId;
     }
 
-    public User read(int userId) {
-        try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(READ_USER_QUERY);
-            statement.setInt(1, userId);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setUsername(resultSet.getString("username"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
-                return user;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public List<User> read(User user) {
+        List<List<Object>> objects = dbUtil.read(
+                "SELECT * FROM users where id = ?",
+                user.getId()
+        );
+
+        List<User> users = objectsToUsers(objects);
+        return users;
     }
 
     public void update(User user) {
-        try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(UPDATE_USER_QUERY);
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword());
-            statement.setInt(4, user.getId());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        dbUtil.update(
+                "UPDATE users SET username = ?, email = ?, password = ? where id = ?",
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getId()
+        );
+    }
+
+    public void delete(User user) {
+        dbUtil.delete(
+                "DELETE FROM users WHERE id = ?",
+                user.getId()
+        );
+    }
+
+    public List<User> findAll() {
+        List<List<Object>> objects = dbUtil.read("SELECT * FROM users");
+
+        List<User> users = objectsToUsers(objects);
+        return users;
+    }
+
+    public List<User> findAllByGroupId(User user) {
+        List<List<Object>> objects = dbUtil.read("SELECT * FROM users WHERE user_group_id = ?", user.getUsersGroupId());
+
+        List<User> users = objectsToUsers(objects);
+        return users;
+    }
+
+    private List<User> objectsToUsers(List<List<Object>> objects) {
+        List<User> users = new ArrayList<>();
+
+        for (int i = 0; i < objects.size(); i++) {
+            User newUser = new User();
+            List<Object> object = objects.get(i);
+
+            newUser.setId((Integer) object.get(0));
+            newUser.setUsername((String) object.get(1));
+            newUser.setEmail((String) object.get(2));
+            newUser.setPassword((String) object.get(3));
+
+            users.add(newUser);
         }
-    }
-
-    public void delete(User user){
-        delete(user.getId());
-    }
-
-    public void delete(int userId) {
-        try (Connection conn = GetConnection.getConnection()) {
-            PreparedStatement statement = conn.prepareStatement(DELETE_USER_QUERY);
-            statement.setInt(1, userId);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private User[] addToArray(User u, User[] users) {
-        User[] tmpUsers = Arrays.copyOf(users, users.length + 1);
-        tmpUsers[users.length] = u;
-        return tmpUsers;
-    }
-
-    public User[] findAll() {
-        try (Connection conn = GetConnection.getConnection()) {
-            User[] users = new User[0];
-            PreparedStatement statement = conn.prepareStatement(FIND_ALL_USERS_QUERY);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setUsername(resultSet.getString("username"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
-                users = addToArray(user, users);
-            }
-            return users;
-        } catch (SQLException e) {
-            e.printStackTrace(); return null;
-        }}
-
-    public User[] findAllByGroupId(UsersGroups usersGroup){
-        try (Connection conn = GetConnection.getConnection()) {
-            User[] users = new User[0];
-            PreparedStatement statement = conn.prepareStatement(FIND_ALL_USERS_BY_USERS_GROUP_ID_QUERY);
-            statement.setInt(1, usersGroup.getId());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setUsername(resultSet.getString("username"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPassword(resultSet.getString("password"));
-                users = addToArray(user, users);
-            }
-            return users;
-        } catch (SQLException e) {
-            e.printStackTrace(); return null;
-        }
+        return users;
     }
 }

@@ -1,7 +1,8 @@
 package pl.coderslab.workshop3.dao;
 
 import pl.coderslab.workshop3.model.Exercise;
-import pl.coderslab.workshop3.utils.GetConnection;
+import pl.coderslab.workshop3.utils.DBUtils;
+
 
 import java.sql.*;
 import java.util.Arrays;
@@ -19,7 +20,7 @@ public class ExerciseDAO {
             "SELECT * FROM exercises";
 
     public Exercise create(Exercise exercise) {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             PreparedStatement statement =
                     conn.prepareStatement(CREATE_EXERCISE_QUERY, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, exercise.getTitle());
@@ -37,7 +38,7 @@ public class ExerciseDAO {
     }
 
     public Exercise read(int exerciseId) {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(READ_EXERCISE_QUERY);
             statement.setInt(1, exerciseId);
             ResultSet resultSet = statement.executeQuery();
@@ -55,7 +56,7 @@ public class ExerciseDAO {
     }
 
     public void update(Exercise exercise) {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(UPDATE_EXERCISES_QUERY);
             statement.setString(1, exercise.getTitle());
             statement.setString(2, exercise.getDescription());
@@ -71,7 +72,7 @@ public class ExerciseDAO {
     }
 
     public void delete(int exerciseId) {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(DELETE_EXERCISE_QUERY);
             statement.setInt(1, exerciseId);
             statement.executeUpdate();
@@ -87,7 +88,7 @@ public class ExerciseDAO {
     }
 
     public Exercise[] findAll() {
-        try (Connection conn = GetConnection.getConnection()) {
+        try (Connection conn = DBUtils.getConnection()) {
             Exercise[] exercises = new Exercise[0];
             PreparedStatement statement = conn.prepareStatement(FIND_ALL_EXERCISES_QUERY);
             ResultSet resultSet = statement.executeQuery();
